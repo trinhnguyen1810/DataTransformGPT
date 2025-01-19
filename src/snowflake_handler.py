@@ -36,7 +36,7 @@ class SnowflakeHandler:
             clean_command = command.replace("'", "''").replace('\n', ' ')
             
             # Create prompt as a properly formatted single line
-            prompt = f"Transform this text according to the command. Text: {clean_text} Command: {clean_command} Rules: Follow the command exactly, return only the transformed text."
+            prompt = f"Transform this text according to the command. Text: {clean_text} Command: {clean_command} Rules: Follow the command exactly, return only the transformed text. No introductory phrases or fillers allowed"
             
             transform_query = f"""
             SELECT SNOWFLAKE.CORTEX.COMPLETE(
@@ -52,7 +52,50 @@ class SnowflakeHandler:
         except Exception as e:
             print(f"Transformation error: {e}")
             return text
+        
+    def batch_generate_column(self, batch_data: List[Dict], column_desc: str) -> List[str]:
+        """Generate new column values for a batch of rows
 
+        Args:
+            batch_data: List of dictionaries containing row data
+            column_desc: Description of what to generate
+
+        Returns:
+            List of generated values for each row
+        """
+        try:
+            cur = self.conn.cursor()
+            results = []
+            
+            for row_data in batch_data:
+                # Clean input data
+                clean_data = {k: str(v).replace("'", "''").replace('\n', ' ') 
+                             for k, v in row_data.items()}
+                clean_desc = column_desc.replace("'", "''").replace('\n', ' ')
+                
+                # Create context from existing data
+                context = " | ".join(f"{k}: {v}" for k, v in clean_data.items())
+                
+                # Create single-line prompt with proper escaping
+                prompt = f"Based on this data: {context} | Generate: {clean_desc} | Answer the following question directly, without introductory phrases or fillers. Return directly only the generated value."
+                
+                query = f"""
+                SELECT SNOWFLAKE.CORTEX.COMPLETE(
+                    'mistral-large2',
+                    '{prompt}'
+                ) AS generated_value
+                """
+                
+                cur.execute(query)
+                result = cur.fetchone()[0]
+                results.append(result)
+            
+            return results
+
+        except Exception as e:
+            print(f"Batch generation error: {e}")
+            return ["(generation failed)"] * len(batch_data)
+        
     def find_matching_rows(self, texts: List[str], search_description: str) -> List[bool]:
         """Use Mistral to find matching rows based on description"""
         try:
@@ -89,29 +132,34 @@ class SnowflakeHandler:
         try:
             cur = self.conn.cursor()
             
-            # Clean and prepare data for single-line format
-            clean_data = {
-                k: str(v).replace("'", "''").replace('\n', ' ').strip() 
-                for k, v in row_data.items()
-            }
-            clean_desc = column_desc.replace("'", "''").replace('\n', ' ').strip()
+            # Clean input data
+            clean_data = {k: str(v).replace("'", "''").replace('\n', ' ') 
+                         for k, v in row_data.items()}
+            clean_desc = column_desc.replace("'", "''").replace('\n', ' ')
             
-            # Create context string
-            context = ", ".join(f"{k}: {v}" for k, v in clean_data.items())
+            # Create context from existing data
+            context = " | ".join(f"{k}: {v}" for k, v in clean_data.items())
             
-            # Create a single-line prompt without special characters
-            prompt = f"Based on these details ({context}) {clean_desc}"
+            prompt = f"""
+            Based on this data: {context}
+            Generate: {clean_desc}
+            Return only the generated value.
+            """
             
-            # Simple SQL query without line breaks or special formatting
-            query = f"""SELECT SNOWFLAKE.CORTEX.COMPLETE('mistral-large2', '{prompt}') AS generated_value"""
+            query = f"""
+            SELECT SNOWFLAKE.CORTEX.COMPLETE(
+                'mistral-large2',
+                '{prompt}'
+            ) AS generated_value
+            """
             
             cur.execute(query)
             result = cur.fetchone()[0]
-            return result.strip()
+            return result
 
         except Exception as e:
             print(f"Generation error: {e}")
-            return "Generation failed"
+            return "(generation failed)"
 
     def close(self):
         """Close Snowflake connection"""
