@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
-from src.core import TransformCore
+from src.core.distributed_core import DistributedTransformCore
+from src.core.transform_core import TransformCore
+
+
 from config import MAX_FILE_SIZE, SUPPORTED_FORMATS
 
 # Initialize
 if 'transformer' not in st.session_state:
-    st.session_state.transformer = TransformCore()
+    st.session_state.transformer = DistributedTransformCore()
 
 # Page Config
 st.set_page_config(page_title="transform", layout="wide")
