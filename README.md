@@ -68,18 +68,6 @@ streamlit run app.py
 - "Create difficulty rating from steps"
 - "Extract key metrics from text"
 
-## Project Structure
-```plaintext
-transform_app/
-├── .env                  # Configuration
-├── requirements.txt      # Dependencies
-├── app.py               # Main UI
-└── src/
-    ├── __init__.py
-    ├── snowflake_handler.py  # Data operations
-    └── core.py              # Business logic
-```
-
 ## Technical Stack
 
 - **Frontend**: Streamlit
