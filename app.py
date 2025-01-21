@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 from src.core.distributed_core import DistributedTransformCore
 from src.core.transform_core import TransformCore
-
-
 from config import MAX_FILE_SIZE, SUPPORTED_FORMATS
+
+
 
 if 'transformer' not in st.session_state:
     st.session_state.transformer = DistributedTransformCore()
@@ -12,7 +12,7 @@ if 'transformer' not in st.session_state:
 st.set_page_config(page_title="DataTransformGPT", layout="wide")
 
 # Main App
-st.title("transform")
+st.title("datatransformer")
 st.markdown("Transform your data using natural language")
 
 
