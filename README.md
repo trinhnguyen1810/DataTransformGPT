@@ -1,4 +1,4 @@
-# DataTransformGPT
+# DataTransformer
 
 DataTransformGPT is a powerful data transformation tool that leverages Snowflake's Mistral LLM capabilities to intelligently transform and generate data using natural language commands.
 
