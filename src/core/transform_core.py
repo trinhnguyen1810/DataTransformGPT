@@ -19,7 +19,6 @@ class TransformCore:
             total_operations = len(df) * len(column_commands)
             completed = 0
             
-            # Get rows to process
             if search_description:
                 search_texts = []
                 for idx in df.index:
@@ -34,13 +33,11 @@ class TransformCore:
             else:
                 matching_rows = df.index
 
-            # Process each column
             for col, settings in column_commands.items():
                 output_col = settings['new_name']
                 if output_col not in result_df.columns:
                     result_df[output_col] = result_df[col]
                 
-                # Process in batches
                 for i in range(0, len(matching_rows), BATCH_SIZE):
                     batch_rows = matching_rows[i:i+BATCH_SIZE]
                     
@@ -85,19 +82,17 @@ class TransformCore:
                     for j in range(len(batch_df))
                 ]
                 
-                # Generate values for batch
                 batch_results = self.snowflake.batch_generate_column(
                     batch_data, 
                     generation_prompt
                 )
                 
-                # Update results
                 end_idx = min(i + BATCH_SIZE, len(df))
                 result_df.iloc[i:end_idx, 
                             result_df.columns.get_loc(new_column_name)] = batch_results[:end_idx-i]
             
             if progress_callback:
-                progress_callback(1.0)  # Ensure we end at 100%
+                progress_callback(1.0)  
                 
             return result_df, None
             

@@ -31,11 +31,11 @@ class SnowflakeHandler:
         try:
             cur = self.conn.cursor()
             
-            # Clean and escape input text and command
+            # clean and escape input text and command
             clean_text = text.replace("'", "''").replace('\n', ' ')
             clean_command = command.replace("'", "''").replace('\n', ' ')
             
-            # Create prompt as a properly formatted single line
+            # create prompt as a properly formatted single line
             prompt = f"Transform this text according to the command. Text: {clean_text} Command: {clean_command} Rules: Follow the command exactly, return only the transformed text. No introductory phrases or fillers allowed"
             
             transform_query = f"""
@@ -54,29 +54,17 @@ class SnowflakeHandler:
             return text
         
     def batch_generate_column(self, batch_data: List[Dict], column_desc: str) -> List[str]:
-        """Generate new column values for a batch of rows
-
-        Args:
-            batch_data: List of dictionaries containing row data
-            column_desc: Description of what to generate
-
-        Returns:
-            List of generated values for each row
-        """
         try:
             cur = self.conn.cursor()
             results = []
             
             for row_data in batch_data:
-                # Clean input data
                 clean_data = {k: str(v).replace("'", "''").replace('\n', ' ') 
                              for k, v in row_data.items()}
                 clean_desc = column_desc.replace("'", "''").replace('\n', ' ')
                 
-                # Create context from existing data
                 context = " | ".join(f"{k}: {v}" for k, v in clean_data.items())
                 
-                # Create single-line prompt with proper escaping
                 prompt = f"Based on this data: {context} | Generate: {clean_desc} | Answer the following question directly, without introductory phrases or fillers. Return directly only the generated value."
                 
                 query = f"""
@@ -102,11 +90,9 @@ class SnowflakeHandler:
             cur = self.conn.cursor()
             matches = []
             
-            # Clean search description
             clean_description = search_description.replace("'", "''").replace('\n', ' ')
             
             for text in texts:
-                # Clean input text
                 clean_text = text.replace("'", "''").replace('\n', ' ')
                 prompt = f"Does this text match the criteria? Criteria: {clean_description} Text: {clean_text} Answer only true or false."
                 
@@ -132,12 +118,10 @@ class SnowflakeHandler:
         try:
             cur = self.conn.cursor()
             
-            # Clean input data
             clean_data = {k: str(v).replace("'", "''").replace('\n', ' ') 
                          for k, v in row_data.items()}
             clean_desc = column_desc.replace("'", "''").replace('\n', ' ')
             
-            # Create context from existing data
             context = " | ".join(f"{k}: {v}" for k, v in clean_data.items())
             
             prompt = f"""

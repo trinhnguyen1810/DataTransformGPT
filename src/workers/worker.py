@@ -33,7 +33,6 @@ def get_snowflake_connection():
         if snowflake:
             snowflake.close()
 
-# In process_transform_chunk function in worker.py
 
 def process_transform_chunk(chunk_df: pd.DataFrame, commands: dict, snowflake: SnowflakeHandler) -> pd.DataFrame:
     """Process a transformation chunk"""
@@ -96,33 +95,28 @@ def worker_process():
     
     while not killer.kill_now:
         try:
-            # Get task from queue
             task = redis_manager.get_task()
             if not task:
                 continue
             
             job_id = task['job_id']
             chunk_id = task['chunk_id']
-            task_type = task.get('task_type', 'transform')  # Default to transform for backward compatibility
+            task_type = task.get('task_type', 'transform')  
             
             logger.info(f"Processing {task_type} chunk {chunk_id} of job {job_id}")
             
             with get_snowflake_connection() as snowflake:
-                # Get job metadata
                 job_data = redis_manager.get_job_metadata(job_id)
                 if not job_data:
                     logger.warning(f"No metadata found for job {job_id}")
                     continue
                 
-                # Load chunk data
                 chunk_df = pd.read_json(task['data'])
                 
                 if task_type == 'transform':
-                    # Handle transformation task
                     commands = json.loads(job_data['commands'])
                     processed_df = process_transform_chunk(chunk_df, commands, snowflake)
                 else:
-                    # Handle generation task
                     reference_columns = json.loads(job_data['reference_columns'])
                     new_column_name = job_data['new_column_name']
                     generation_prompt = job_data['generation_prompt']
@@ -134,10 +128,8 @@ def worker_process():
                         snowflake
                     )
                 
-                # Store result
                 redis_manager.store_result(job_id, chunk_id, processed_df.to_json())
                 
-                # Update progress
                 redis_manager.increment_completed(job_id)
                 logger.info(f"Completed chunk {chunk_id} of job {job_id}")
                 

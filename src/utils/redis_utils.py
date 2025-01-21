@@ -25,7 +25,6 @@ class RedisManager:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(RedisManager, cls).__new__(cls)
-            # Move connection setup to __init__
         return cls._instance
 
     def _test_connection(self):
@@ -103,10 +102,8 @@ class RedisManager:
 
     def cleanup_job(self, job_id: str):
         try:
-            # Delete job metadata
             self.client.delete(f'job:{job_id}')
             
-            # Delete all chunk results
             keys = self.client.keys(f'result:{job_id}:*')
             if keys:
                 self.client.delete(*keys)
@@ -125,6 +122,7 @@ class RedisManager:
         except Exception as e:
             logger.error(f"Error monitoring progress: {str(e)}")
             return 0, 0
+    
 
     def close(self):
         try:
