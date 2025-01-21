@@ -1,7 +1,6 @@
 # DataTransformGPT
 
 DataTransformGPT is a powerful data transformation tool that leverages Snowflake's Mistral LLM capabilities to intelligently transform and generate data using natural language commands.
-Try it here: https://trinhnguyen1810-datatransformgpt-app-isl7ba.streamlit.app/
 
 I realized that while many projects focus on natural language to SQL (which helps query data), there's a gap in actually enriching and transforming the data itself. What if we could use AI not just to query data, but to understand it deeply enough to generate new insights and transformations? This is where DataTransformer comes in - it's not about querying existing data, it's about intelligently enriching it. By combining Snowflake's Mistral LLM with distributed processing, we can analyze context across multiple columns to generate new, meaningful data that wasn't explicitly present in the original dataset. Furthermore, it can transform your old data into your desired output (even filter rows using human-like search criteria). I also ensure that data integrity is maintained and that the transformed or newly generated data is as close as possible to the ground truth of the actual data itself.
 
