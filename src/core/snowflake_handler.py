@@ -1,10 +1,7 @@
 import snowflake.connector
 from snowflake.connector.errors import ProgrammingError
-import os
-from dotenv import load_dotenv
+import streamlit as st
 from typing import Optional, Dict, Any, List
-
-load_dotenv()
 
 class SnowflakeHandler:
     def __init__(self):
@@ -14,13 +11,12 @@ class SnowflakeHandler:
         """Create Snowflake connection"""
         try:
             return snowflake.connector.connect(
-                user=os.getenv('SNOWFLAKE_USER'),
-                password=os.getenv('SNOWFLAKE_PASSWORD'),
-                account='enfmtbh-mgb45671',
-                region='us-west-2',
-                warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
-                database=os.getenv('SNOWFLAKE_DATABASE'),
-                schema=os.getenv('SNOWFLAKE_SCHEMA')
+                user=st.secrets["SNOWFLAKE_USER"],
+                password=st.secrets["SNOWFLAKE_PASSWORD"],
+                account=st.secrets["SNOWFLAKE_ACCOUNT"],
+                warehouse=st.secrets["SNOWFLAKE_WAREHOUSE"],
+                database=st.secrets["SNOWFLAKE_DATABASE"],
+                schema=st.secrets["SNOWFLAKE_SCHEMA"]
             )
         except ProgrammingError as e:
             print(f"Failed to connect to Snowflake: {e}")
@@ -30,21 +26,16 @@ class SnowflakeHandler:
         """Transform text using Mistral via Snowflake Cortex"""
         try:
             cur = self.conn.cursor()
-            
-            # clean and escape input text and command
             clean_text = text.replace("'", "''").replace('\n', ' ')
             clean_command = command.replace("'", "''").replace('\n', ' ')
-            
-            # create prompt as a properly formatted single line
             prompt = f"Transform this text according to the command. Text: {clean_text} Command: {clean_command} Rules: Follow the command exactly, return only the transformed text. No introductory phrases or fillers allowed"
-            
+
             transform_query = f"""
             SELECT SNOWFLAKE.CORTEX.COMPLETE(
                 'mistral-large2',
                 '{prompt}'
             ) AS transformed_text
             """
-            
             cur.execute(transform_query)
             result = cur.fetchone()
             return result[0] if result else text
