@@ -68,12 +68,12 @@ SNOWFLAKE_DATABASE=your_database
 SNOWFLAKE_SCHEMA=your_schema
 ```
 
-# Start Redis (optional - for distributed mode)
+### Start Redis (optional - for distributed mode)
 ```bash
 brew services start redis
 ```
 
-# Start worker processes (optional - for distributed mode)
+### Start worker processes (optional - for distributed mode)
 ```bash
  ./scripts/start_workers.sh
 ```
