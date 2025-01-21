@@ -1,29 +1,55 @@
 # DataTransformGPT
 
-A data transformation tool that leverages Snowflake Cortex and Mistral LLM for intelligent data manipulation using natural language commands.
+DataTransformGPT is a powerful data transformation tool that leverages Snowflake's Mistral LLM capabilities to intelligently transform and generate data using natural language commands.
+Try it here: https://trinhnguyen1810-datatransformgpt-app-isl7ba.streamlit.app/
 
-## Core Features
+## Features
 
-### Column Transformations
-- Transform existing columns with natural language
-- Replace or create new columns
-- Bulk transformations with custom commands
+- **Natural Language Data Transformation**: Transform data columns using simple English commands
+- **Distributed Processing**: Handles large datasets efficiently using Redis-based distributed processing
+- **Smart Row Filtering**: Filter rows using natural language descriptions
+- **Column Generation**: Generate new columns based on existing data using natural language prompts
+- **Batch Processing**: Optimized chunk-based processing for better performance
+- **Fallback Mode**: Gracefully handles situations when distributed processing isn't available
 
-### Data Generation
-- Generate new columns based on existing data
-- Smart data inference with accuracy indicators
-- Context-aware data generation
+## Technical Implementation
 
-### Intelligent Row Selection
-- Natural language row filtering
-- Context-based row matching
-- Custom selection criteria
+### Core Components:
+- **Snowflake Mistral LLM**: Powers natural language understanding and data transformation
+- **Redis**: Manages distributed task queue and result aggregation
+- **Streamlit**: Provides intuitive user interface
+- **Pandas**: Handles data manipulation and processing
+
+### Architecture:
+- **Distributed Core**: Splits large datasets into chunks for parallel processing
+- **Worker Processes**: Handle individual data chunks independently
+- **Task Queue**: Manages work distribution and progress tracking
+- **Result Aggregation**: Combines processed chunks while maintaining data integrity
+
+## Usage
+
+1. Upload your dataset (CSV or Excel)
+2. Choose operation type:
+   - Transform existing columns
+   - Generate new columns
+   - Both
+3. For transformations:
+   - Select columns to transform
+   - Enter natural language commands
+   - Choose output options (replace or new column)
+4. For generation:
+   - Name your new column
+   - Select reference columns
+   - Describe what to generate
+5. Optionally filter rows using natural language
+6. Click "Transform Data" to process
+7. Download transformed results
 
 ## Installation
 
 1. **Clone and Setup**
 ```bash
-git clone [your-repo]
+git clone https://github.com/trinhnguyen1810/DataTransformGPT.git
 cd transform_app
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -41,6 +67,17 @@ SNOWFLAKE_WAREHOUSE=your_warehouse
 SNOWFLAKE_DATABASE=your_database
 SNOWFLAKE_SCHEMA=your_schema
 ```
+
+# Start Redis (optional - for distributed mode)
+```bash
+brew services start redis
+```
+
+# Start worker processes (optional - for distributed mode)
+```bash
+ ./scripts/start_workers.sh
+```
+
 
 ## Usage
 
@@ -70,10 +107,11 @@ streamlit run app.py
 
 ## Technical Stack
 
-- **Frontend**: Streamlit
-- **Data Processing**: Pandas
-- **LLM**: Mistral on Snowflake Cortex
-- **Storage**: Snowflake
+ I architected the solution with three main components:
+- Frontend Layer: Built with Streamlit for an intuitive user interface
+- Processing Layer: Implemented distributed processing using Redis for scalability
+- AI Layer: Leveraged Snowflake's Mistral LLM for natural language understanding and data transformation
+The system uses a distributed architecture where tasks are split into chunks and processed in parallel, with results aggregated back to provide a seamless user experience.
 
 ## Requirements
 
@@ -94,9 +132,7 @@ streamlit run app.py
 - Active Snowflake connection needed
 
 ## Future Improvements
-
-- Batch processing support
-- Custom transformation templates
-- Advanced data validation
-- More output formats
-- Transformation history
+- Support additional formats, including non-relational ones like JSON.
+- Combine datasets to generate data that maintains the ground truth of both sources.
+- Improve scalability and performance for faster processing.
+- Implement transformation history tracking.
