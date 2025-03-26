@@ -127,7 +127,6 @@ The system uses a distributed architecture where tasks are split into chunks and
 
 ## Limitations
 
-- Max file size: 5MB
 - Supported formats: CSV, Excel
 - Generated data requires verification
 - Active Snowflake connection needed
